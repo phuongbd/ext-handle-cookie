@@ -1,0 +1,35 @@
+{
+  "parser": "@babel/eslint-parser",
+  "rules": {
+    "quotes": ["error", "double"],
+    "no-var": 1,
+    "no-undef": "warn",
+    "react/jsx-uses-vars": "error",
+    "no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "none",
+        "ignoreRestSiblings": false,
+        "caughtErrors": "none",
+        "caughtErrorsIgnorePattern": "^ignore"
+      }
+    ]
+  },
+  "plugins": ["react"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "globals": {
+    "_": "readonly",
+    "chrome": "readonly",
+    "React": true,
+    "JSX": true
+  }
+}

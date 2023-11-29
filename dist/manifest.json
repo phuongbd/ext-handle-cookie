@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Cookies handle",
+  "description": "Cookies handle",
+  "author": "duyphuongg",
+  "version": "1.0",
+  "action": {
+    "default_icon": {
+      "16": "images/cookies.png",
+      "48": "images/cookies.png",
+      "128": "images/cookies.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "images/cookies.png",
+    "48": "images/cookies.png",
+    "128": "images/cookies.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["contentScript.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["activeTab", "storage", "scripting", "cookies"],
+  "host_permissions": ["<all_urls>"]
+}
