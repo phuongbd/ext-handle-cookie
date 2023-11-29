@@ -85,25 +85,31 @@ const Popup = () => {
   };
 
   const handleImportCookies = (e) => {
-    setStatusLoading("import", true);
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const content = e.target.result;
-      const contentParse = JSON.parse(content);
-      contentParse?.cookies &&
-        contentParse.cookies.map((cookie) => {
-          console.log(1111, cookie);
-          return chrome.cookies.set(cookie, function (c) {
-            console.log("Cookie set:", c);
+    try {
+      setStatusLoading("import", true);
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        const content = e.target.result;
+        const contentParse = JSON.parse(content);
+        if (contentParse?.cookies) {
+          const add = contentParse.cookies.map((cookie) => {
+            return chrome.cookies.set(cookie, function (c) {
+              console.log("Cookie set:", c);
+            });
           });
-        });
-    };
-    reader.readAsText(file);
-    setStatusLoading("import", false);
-    // if (isReload) {
-    //   chrome.tabs.reload(currentTabId);
-    // }
+          await Promise.all(add);
+        }
+      };
+      reader.readAsText(file);
+      setStatusLoading("import", false);
+      if (isReload) {
+        chrome.tabs.reload(currentTabId);
+      }
+    } catch (error) {
+      setStatusLoading("import", false);
+      console.log("error", error);
+    }
   };
 
   const handleClearCookies = async () => {

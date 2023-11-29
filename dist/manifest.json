@@ -28,6 +28,6 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "storage", "scripting", "cookies", "tabs"],
+  "permissions": ["activeTab", "cookies"],
   "host_permissions": ["<all_urls>"]
 }
