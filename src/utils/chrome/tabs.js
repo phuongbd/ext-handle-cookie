@@ -6,14 +6,18 @@
 export const CONSTANT = {
   GET_TABS: "GET_TABS",
   SENDER_FROM_TAB: "SENDER_FROM_TAB",
-  UPDATE_TAB: "UPDATE_TAB"
+  UPDATE_TAB: "UPDATE_TAB",
 };
 
 /**
  * add initListenerTab vào backgroundScript
  */
 export function initListenerTab() {
-  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse
+  ) {
     listenTabs(request, sender, sendResponse);
   });
 }
@@ -56,10 +60,26 @@ export function updateTab(tabId, options = {}, sendResponse = null) {
   });
 }
 
+export async function getCurrentTab() {
+  let queryOptions = { active: true, lastFocusedWindow: true };
+  let [tab] = await chrome.tabs.query(queryOptions);
+  return tab;
+}
+
 export function sendMessageBackgroundToContentScript(message) {
-  chrome.tabs.query({url: ["https://admin.shopify.com/*", "https://*.myshopify.com/admin/*", "https://*.ngrok-free.app/*", "https://*.alireviews.dev/*"]}, function(tabs) {
-    tabs.forEach(function(tab) {
-      chrome.tabs.sendMessage(tab.id, message);
-    });
-  });
+  chrome.tabs.query(
+    {
+      url: [
+        "https://admin.shopify.com/*",
+        "https://*.myshopify.com/admin/*",
+        "https://*.ngrok-free.app/*",
+        "https://*.alireviews.dev/*",
+      ],
+    },
+    function (tabs) {
+      tabs.forEach(function (tab) {
+        chrome.tabs.sendMessage(tab.id, message);
+      });
+    }
+  );
 }

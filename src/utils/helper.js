@@ -1,3 +1,53 @@
+export const isValidUrl = (urlString) => {
+  let urlPattern = new RegExp(
+    "^(https?:\\/\\/)?" + // validate protocol
+      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // validate domain name
+      "((\\d{1,3}\\.){3}\\d{1,3}))" + // validate OR ip (v4) address
+      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // validate port and path
+      "(\\?[;&a-z\\d%_.~+=-]*)?" + // validate query string
+      "(\\#[-a-z\\d_]*)?$",
+    "i"
+  ); // validate fragment locator
+  return !!urlPattern.test(urlString);
+};
+
+export function saveJSON(data, saveAs) {
+  let stringified = JSON.stringify(data, null, 2);
+  let blob = new Blob([stringified], { type: "application/json" });
+  let url = URL.createObjectURL(blob);
+
+  let a = document.createElement("a");
+  a.download = saveAs + ".json";
+  a.href = url;
+  a.id = saveAs;
+  document.body.appendChild(a);
+  a.click();
+  document.querySelector("#" + a.id).remove();
+}
+
+export function formatDateTime(date) {
+  if (!(date instanceof Date) || isNaN(date)) {
+    return "Invalid Date";
+  }
+
+  const addLeadingZero = (number) => (number < 10 ? "0" + number : number);
+
+  const day = addLeadingZero(date.getDate());
+  const month = addLeadingZero(date.getMonth() + 1); // Months are zero-based
+  const year = addLeadingZero(date.getFullYear() % 100);
+  const hours = addLeadingZero(date.getHours());
+  const minutes = addLeadingZero(date.getMinutes());
+
+  const formattedDateTime = `${day}_${month}_${year}_${hours}_${minutes}`;
+
+  return formattedDateTime;
+}
+
+export function replaceDotsWithUnderscores(input) {
+  const output = input.replace(/\./g, "_");
+  return output;
+}
+
 export function addScriptToDom(script_file, request, sendResponse) {
   // Them trackingId cho trang AE
   try {

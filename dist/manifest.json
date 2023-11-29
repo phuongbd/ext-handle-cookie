@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Cookies handle",
-  "description": "Cookies handle",
+  "name": "Cookie sharing",
+  "description": "Cookie sharing",
   "author": "duyphuongg",
   "version": "1.0",
   "action": {
@@ -28,6 +28,6 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["activeTab", "storage", "scripting", "cookies"],
+  "permissions": ["activeTab", "storage", "scripting", "cookies", "tabs"],
   "host_permissions": ["<all_urls>"]
 }
