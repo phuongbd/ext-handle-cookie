@@ -19,12 +19,12 @@ export const StyledPopupWrap = styled.div`
     padding: 16px;
 
     .ant-alert {
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
 
     .password__title {
       margin-top: 0;
-      margin-bottom: 8px;
+      margin-bottom: 2px;
       span {
         width: 100%;
         display: block;
@@ -32,11 +32,15 @@ export const StyledPopupWrap = styled.div`
     }
     .password__input {
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 2px;
 
       input[type="file"] {
         display: none;
       }
+    }
+
+    .ant-checkbox-wrapper {
+      margin-top: 4px;
     }
   }
 

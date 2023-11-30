@@ -91,21 +91,28 @@ const Popup = () => {
       const reader = new FileReader();
       reader.onload = async function (e) {
         const content = e.target.result;
-        const contentParse = JSON.parse(content);
+        const contentParse = content && JSON.parse(content);
         if (contentParse?.cookies) {
           const add = contentParse.cookies.map((cookie) => {
-            return chrome.cookies.set(cookie, function (c) {
+            const { hostOnly, session, ...rest } = cookie;
+            const cookieSet = { ...rest, url: contentParse?.url };
+            return chrome.cookies.set(cookieSet, function (c) {
               console.log("Cookie set:", c);
             });
           });
           await Promise.all(add);
+          if (isReload) {
+            chrome.tabs.reload(currentTabId);
+          }
+          messageApi.open({
+            type: "success",
+            content: "Import done!",
+          });
+          inputCookieFile.current.value = null;
         }
       };
       reader.readAsText(file);
       setStatusLoading("import", false);
-      if (isReload) {
-        chrome.tabs.reload(currentTabId);
-      }
     } catch (error) {
       setStatusLoading("import", false);
       console.log("error", error);
@@ -114,7 +121,7 @@ const Popup = () => {
 
   const handleClearCookies = async () => {
     const isConfirm = window.confirm(
-      "Do you want to remove all cookies of this website?"
+      `Do you want to remove all cookies of ${webUrl.hostname}?`
     );
     if (!isConfirm) return;
     setStatusLoading("clear", true);
@@ -164,7 +171,7 @@ const Popup = () => {
   return (
     <StyledPopupWrap>
       <div className="header">
-        <Text>Cookies for {webUrl?.hostname ? webUrl.hostname : "--"}</Text>
+        <Text>Cookies for: {webUrl?.hostname ? webUrl.hostname : "--"}</Text>
       </div>
       <div className="content">
         {!isValidWebUrl && (
@@ -173,7 +180,6 @@ const Popup = () => {
 
         <div className="password__title">
           <Text>Password :</Text>
-          <Text type="warning">*Leave blank if no password required.</Text>
         </div>
 
         <div className="password__input-wrap">
@@ -187,6 +193,7 @@ const Popup = () => {
                 visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
               }
             />
+
             <input
               type="file"
               accept=".json"
@@ -194,6 +201,8 @@ const Popup = () => {
               onChange={handleImportCookies}
             ></input>
           </Space.Compact>
+          <Text type="warning">*Leave blank if no password required.</Text>
+
           <Checkbox
             disabled={!isValidWebUrl}
             checked={isReload}
@@ -224,7 +233,7 @@ const Popup = () => {
           danger
           onClick={handleClearCookies}
         >
-          Clear cookies for this website
+          Clear
         </Button>
       </div>
 

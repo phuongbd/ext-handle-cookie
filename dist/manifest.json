@@ -1,7 +1,7 @@
 {
+  "name": "Cookies Sharing",
+  "description": "Share online accounts without revealing your password.",
   "manifest_version": 3,
-  "name": "Cookie sharing",
-  "description": "Cookie sharing",
   "author": "duyphuongg",
   "version": "1.0",
   "action": {
