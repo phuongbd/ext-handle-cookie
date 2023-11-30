@@ -1,16 +1,20 @@
 import styled from "styled-components";
 
 export const StyledPopupWrap = styled.div`
-  min-width: 500px;
+  min-width: 450px;
   margin: auto;
 
   .header {
-    background-color: #7dbcea;
-    padding: 16px;
+    border: 1px solid #d9d9d9;
+    border-bottom: none;
+    padding: 12px;
     border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    span {
-      color: #fff;
+    h5 {
+      margin: 0;
     }
   }
 

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { StyledPopupWrap } from "./styled";
+import CryptoJS from "crypto-js";
 import {
   Button,
   Input,
@@ -14,10 +15,10 @@ import {
   formatDateTime,
   isValidUrl,
   replaceDotsWithUnderscores,
-  saveJSON,
+  saveAsJsonOrText,
 } from "~/utils/helper";
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 const Popup = () => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -68,15 +69,23 @@ const Popup = () => {
 
   const handleExportCookies = async () => {
     setStatusLoading("export", true);
-    const cookies = await handleGetDomainCookies();
-    const dataJson = {
-      url: webUrl?.origin,
-      cookies,
-    };
     const dateTime = formatDateTime(new Date());
     const webUrlFormat = replaceDotsWithUnderscores(webUrl?.hostname);
     const fileName = `${webUrlFormat}_${dateTime}`;
-    saveJSON(dataJson, fileName);
+    const cookies = await handleGetDomainCookies();
+    let dataJson = {
+      url: webUrl?.origin,
+      cookies,
+    };
+    if (password.length > 0) {
+      dataJson = CryptoJS.AES.encrypt(
+        JSON.stringify(dataJson),
+        password
+      ).toString();
+      saveAsJsonOrText(dataJson, fileName, "text");
+    } else {
+      saveAsJsonOrText(dataJson, fileName, "json");
+    }
     setStatusLoading("export", false);
   };
 
@@ -90,8 +99,17 @@ const Popup = () => {
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = async function (e) {
-        const content = e.target.result;
+        let content = e.target.result;
+        inputCookieFile.current.value = null;
+        console.log("🚀 ~ file: Popup.jsx:103 ~ content 11:", content);
+        if (password.length > 0) {
+          const bytes = CryptoJS.AES.decrypt(content.toString(), password);
+          console.log("🚀 ~ file: Popup.jsx:107 ~ bytes:", bytes);
+          let data = bytes.toString(CryptoJS.enc.Utf8);
+          console.log("🚀 ~ file: Popup.jsx:107 ~ content 22:", data);
+        }
         const contentParse = content && JSON.parse(content);
+        console.log("🚀 ~ file: Popup.jsx:102 ~ contentParse:", contentParse);
         if (contentParse?.cookies) {
           const add = contentParse.cookies.map((cookie) => {
             const { hostOnly, session, ...rest } = cookie;
@@ -108,7 +126,6 @@ const Popup = () => {
             type: "success",
             content: "Import done!",
           });
-          inputCookieFile.current.value = null;
         }
       };
       reader.readAsText(file);
@@ -171,7 +188,12 @@ const Popup = () => {
   return (
     <StyledPopupWrap>
       <div className="header">
-        <Text>Cookies for: {webUrl?.hostname ? webUrl.hostname : "--"}</Text>
+        <Title level={5}>
+          Cookies for: {webUrl?.hostname ? webUrl.hostname : "--"}
+        </Title>
+        <Button type="text" danger onClick={handleClearCookies}>
+          Clear cookies
+        </Button>
       </div>
       <div className="content">
         {!isValidWebUrl && (
@@ -179,7 +201,7 @@ const Popup = () => {
         )}
 
         <div className="password__title">
-          <Text>Password :</Text>
+          <Text>Password:</Text>
         </div>
 
         <div className="password__input-wrap">
@@ -196,7 +218,7 @@ const Popup = () => {
 
             <input
               type="file"
-              accept=".json"
+              accept=".json, .txt"
               ref={inputCookieFile}
               onChange={handleImportCookies}
             ></input>
@@ -215,13 +237,6 @@ const Popup = () => {
       </div>
       <div className="footer">
         <Button
-          type="primary"
-          disabled={!isValidWebUrl || loading.export}
-          onClick={handleExportCookies}
-        >
-          Export
-        </Button>
-        <Button
           disabled={!isValidWebUrl || loading.import}
           onClick={handleTriggerFile}
         >
@@ -229,11 +244,10 @@ const Popup = () => {
         </Button>
         <Button
           type="primary"
-          disabled={!isValidWebUrl || loading.clear}
-          danger
-          onClick={handleClearCookies}
+          disabled={!isValidWebUrl || loading.export}
+          onClick={handleExportCookies}
         >
-          Clear
+          Export
         </Button>
       </div>
 

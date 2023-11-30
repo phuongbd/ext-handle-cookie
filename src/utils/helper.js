@@ -11,15 +11,18 @@ export const isValidUrl = (urlString) => {
   return !!urlPattern.test(urlString);
 };
 
-export function saveJSON(data, saveAs) {
-  let stringified = JSON.stringify(data, null, 2);
-  let blob = new Blob([stringified], { type: "application/json" });
-  let url = URL.createObjectURL(blob);
+export function saveAsJsonOrText(data, fileName, type) {
+  const fileType =
+    type === "json" ? "application/json" : "text/plain;charset=utf-8";
+  const stringified = JSON.stringify(data, null, 2);
+  const blob = new Blob([stringified], { type: fileType });
+  const url = URL.createObjectURL(blob);
 
-  let a = document.createElement("a");
-  a.download = saveAs + ".json";
+  const a = document.createElement("a");
+  const fileExtensions = type === "json" ? ".json" : ".txt";
+  a.download = fileName + fileExtensions;
   a.href = url;
-  a.id = saveAs;
+  a.id = fileName;
   document.body.appendChild(a);
   a.click();
   document.querySelector("#" + a.id).remove();
