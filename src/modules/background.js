@@ -1,4 +1,5 @@
-import { queryType } from "~/constants/fetch";
+import { queryType } from "~/constants";
+import { setCookies } from "~/utils/chrome/cookies";
 import { initListenerTab } from "~/utils/chrome/tabs";
 import {
   requestAPI,
@@ -54,6 +55,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       break;
     case queryType.ADD_CUSTOM_SCRIPT_TO_DOM:
       addScriptToDom("customScript.js", request.values, sendResponse);
+      break;
+    case queryType.SET_COOKIES:
+      setCookies(request.values.content, request.values.tabId, sendResponse);
       break;
   }
   // Will respond asynchronously.

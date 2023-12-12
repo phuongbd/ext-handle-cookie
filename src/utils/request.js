@@ -1,4 +1,4 @@
-import { queryType } from "~/constants/fetch";
+import { queryType } from "~/constants";
 import {
   requestAPI,
   requestFollowAPI,

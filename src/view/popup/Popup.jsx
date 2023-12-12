@@ -17,6 +17,7 @@ import {
   replaceDotsWithUnderscores,
   saveAsJsonOrText,
 } from "~/utils/helper";
+import { queryType } from "~/constants";
 
 const { Text, Title } = Typography;
 
@@ -123,25 +124,14 @@ const Popup = () => {
         inputCookieFile.current.value = null;
         const decode = decryptText(content, password);
         const contentParse = decode && JSON.parse(decode);
-        console.log("🚀 ~ file: Popup.jsx:115 ~ contentParse:", contentParse);
-        if (contentParse?.cookies) {
-          const add = contentParse.cookies.map((cookie) => {
-            // eslint-disable-next-line no-unused-vars
-            const { hostOnly, session, ...rest } = cookie;
-            const cookieSet = { ...rest, url: contentParse?.url };
-            return chrome.cookies.set(cookieSet, function (c) {
-              console.log("Cookie set:", c);
-            });
-          });
-          await Promise.all(add);
-          if (isReload) {
-            chrome.tabs.reload(currentTabId);
-          }
-          messageApi.open({
-            type: "success",
-            content: "Import done!",
-          });
-        }
+
+        chrome.runtime.sendMessage({
+          contentScriptQuery: queryType.SET_COOKIES,
+          values: {
+            tabId: currentTabId,
+            content: contentParse,
+          },
+        });
       };
       reader.readAsText(file);
       setStatusLoading("import", false);

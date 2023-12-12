@@ -7,4 +7,5 @@ export const queryType = {
   PUT: "put",
   POST: "post",
   ADD_CUSTOM_SCRIPT_TO_DOM: "ADD_CUSTOM_SCRIPT_TO_DOM",
+  SET_COOKIES: "SET_COOKIES",
 };
