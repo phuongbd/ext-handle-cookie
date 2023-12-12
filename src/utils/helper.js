@@ -14,7 +14,7 @@ export const isValidUrl = (urlString) => {
 export function saveAsJsonOrText(data, fileName, type) {
   const fileType =
     type === "json" ? "application/json" : "text/plain;charset=utf-8";
-  const stringified = JSON.stringify(data, null, 2);
+  const stringified = type === "json" ? JSON.stringify(data, null, 2) : data;
   const blob = new Blob([stringified], { type: fileType });
   const url = URL.createObjectURL(blob);
 

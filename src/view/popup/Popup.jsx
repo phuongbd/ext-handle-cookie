@@ -27,6 +27,7 @@ const Popup = () => {
   const [isReload, setIsReload] = useState(true);
   const [isValidWebUrl, setIsValidWebUrl] = useState(true);
   const [password, setPassword] = useState("");
+  const [isRequired, setIsRequired] = useState(false);
   const [loading, setLoading] = useState({
     export: false,
     import: false,
@@ -43,7 +44,11 @@ const Popup = () => {
   };
 
   const handleChangePassword = (e) => {
-    setPassword(e.target.value);
+    const pass = e.target.value.trim();
+    if (pass.length > 0) {
+      setIsRequired(false);
+      setPassword(pass);
+    }
   };
 
   const handleWebUrl = async () => {
@@ -67,33 +72,48 @@ const Popup = () => {
     }
   };
 
+  const encryptText = (string, pass) => {
+    return CryptoJS.AES.encrypt(string, pass).toString();
+  };
+
+  const decryptText = (text, pass) => {
+    const bytes = CryptoJS.AES.decrypt(text, pass);
+    const originalText = bytes.toString(CryptoJS.enc.Utf8);
+    return originalText;
+  };
+
+  const handleTriggerFile = () => {
+    if (password.length === 0) {
+      setIsRequired(true);
+      return;
+    }
+    inputCookieFile.current.click();
+  };
+
   const handleExportCookies = async () => {
+    if (password.length === 0) {
+      setIsRequired(true);
+      return;
+    }
     setStatusLoading("export", true);
     const dateTime = formatDateTime(new Date());
     const webUrlFormat = replaceDotsWithUnderscores(webUrl?.hostname);
     const fileName = `${webUrlFormat}_${dateTime}`;
     const cookies = await handleGetDomainCookies();
-    let dataJson = {
+    const dataJson = {
       url: webUrl?.origin,
       cookies,
     };
-    if (password.length > 0) {
-      dataJson = CryptoJS.AES.encrypt(
-        JSON.stringify(dataJson),
-        password
-      ).toString();
-      saveAsJsonOrText(dataJson, fileName, "text");
-    } else {
-      saveAsJsonOrText(dataJson, fileName, "json");
-    }
+    const dataEncrypt = encryptText(JSON.stringify(dataJson), password);
+    saveAsJsonOrText(dataEncrypt, fileName, "text");
     setStatusLoading("export", false);
   };
 
-  const handleTriggerFile = () => {
-    inputCookieFile.current.click();
-  };
-
   const handleImportCookies = (e) => {
+    if (password.length === 0) {
+      setIsRequired(true);
+      return;
+    }
     try {
       setStatusLoading("import", true);
       const file = e.target.files[0];
@@ -101,17 +121,12 @@ const Popup = () => {
       reader.onload = async function (e) {
         let content = e.target.result;
         inputCookieFile.current.value = null;
-        console.log("🚀 ~ file: Popup.jsx:103 ~ content 11:", content);
-        if (password.length > 0) {
-          const bytes = CryptoJS.AES.decrypt(content.toString(), password);
-          console.log("🚀 ~ file: Popup.jsx:107 ~ bytes:", bytes);
-          let data = bytes.toString(CryptoJS.enc.Utf8);
-          console.log("🚀 ~ file: Popup.jsx:107 ~ content 22:", data);
-        }
-        const contentParse = content && JSON.parse(content);
-        console.log("🚀 ~ file: Popup.jsx:102 ~ contentParse:", contentParse);
+        const decode = decryptText(content, password);
+        const contentParse = decode && JSON.parse(decode);
+        console.log("🚀 ~ file: Popup.jsx:115 ~ contentParse:", contentParse);
         if (contentParse?.cookies) {
           const add = contentParse.cookies.map((cookie) => {
+            // eslint-disable-next-line no-unused-vars
             const { hostOnly, session, ...rest } = cookie;
             const cookieSet = { ...rest, url: contentParse?.url };
             return chrome.cookies.set(cookieSet, function (c) {
@@ -201,7 +216,7 @@ const Popup = () => {
         )}
 
         <div className="password__title">
-          <Text>Password:</Text>
+          <Text>Password</Text> <label className="label-required">*</label>
         </div>
 
         <div className="password__input-wrap">
@@ -223,7 +238,7 @@ const Popup = () => {
               onChange={handleImportCookies}
             ></input>
           </Space.Compact>
-          <Text type="warning">*Leave blank if no password required.</Text>
+          {isRequired && <Text type="danger">This field is required.</Text>}
 
           <Checkbox
             disabled={!isValidWebUrl}

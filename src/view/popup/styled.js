@@ -29,9 +29,8 @@ export const StyledPopupWrap = styled.div`
     .password__title {
       margin-top: 0;
       margin-bottom: 2px;
-      span {
-        width: 100%;
-        display: block;
+      label {
+        color: #ff4d4f;
       }
     }
     .password__input {
@@ -41,6 +40,10 @@ export const StyledPopupWrap = styled.div`
       input[type="file"] {
         display: none;
       }
+    }
+
+    .ant-typography-danger {
+      display: block;
     }
 
     .ant-checkbox-wrapper {
