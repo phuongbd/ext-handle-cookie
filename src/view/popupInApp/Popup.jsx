@@ -21,7 +21,7 @@ import { queryType } from "~/constants";
 
 const { Text, Title } = Typography;
 
-const Popup = () => {
+const PopupInApp = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [webUrl, setWebUrl] = useState("");
   const [currentTabId, setCurrentTabId] = useState("");
@@ -261,4 +261,4 @@ const Popup = () => {
   );
 };
 
-export default Popup;
+export default PopupInApp;
